@@ -3,6 +3,7 @@ import * as ReactDOM from "react-dom";
 import { PrimaryButton, Text } from "@fluentui/react";
 
 function App() {
+  console.log(window)
   return (
     <>
       <Text variant={"xLarge"} nowrap block>
@@ -10,7 +11,7 @@ function App() {
       </Text>
       <PrimaryButton
         onClick={function () {
-          alert("Hello World!");
+          window.electron.ipcRenderer.myPing();
         }}
       >
         Press Me
