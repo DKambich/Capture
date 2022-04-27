@@ -36,18 +36,6 @@ const createWindow = (): void => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", function () {
-  // Define a Content-Security-Policy to allow the font-src for Fluent UI
-  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    callback({
-      responseHeaders: {
-        ...details.responseHeaders,
-        "Content-Security-Policy": [
-          "font-src https://static2.sharepointonline.com/files/fabric/assets/ https://spoppe-b.azureedge.net/files/fabric-cdn-prod_20210407.001/assets/",
-        ],
-      },
-    });
-  });
-
   // Create the main App window
   createWindow();
 });

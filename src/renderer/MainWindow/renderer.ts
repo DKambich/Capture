@@ -28,11 +28,6 @@
 // TODO: This renderer.ts entrypoint is defined in package.json, for other windows, define a seperate entrypoint with HTML, JS, and a name
 import "./index.css";
 
-// TODO: Decide whether to use font (@fluentui/font-icons-mdl2) or React icons (@fluentui/react-icons-mdl2). If using React icons, remove the Content-Security-Policy font-src for https://spoppe-b.azureedge.net/files/fabric-cdn-prod_20210407.001/assets/
-import { initializeIcons } from "@fluentui/font-icons-mdl2";
-
-initializeIcons();
-
 
 // Add this to the end of the existing file
 import "./App";
