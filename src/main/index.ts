@@ -5,6 +5,7 @@ import { app, BrowserWindow, ipcMain, session } from "electron";
 // whether you're running in development or production).
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+declare const VIDEO_CONTROLS_WEBPACK_ENTRY: string;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -70,6 +71,14 @@ app.on("activate", () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+
+// Test to create new window
 ipcMain.on("ipc-example", async (event, arg) => {
-  createWindow();
+  const captureControlsWindow = new BrowserWindow({
+    height: 720,
+    width: 1280,
+  });
+
+  // and load the index.html of the app.
+  captureControlsWindow.loadURL(VIDEO_CONTROLS_WEBPACK_ENTRY);
 });
