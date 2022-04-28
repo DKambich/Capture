@@ -10,6 +10,7 @@ declare global {
       };
       ipcRenderer: {
         record(): void;
+        getMediaSources(): Promise<DesktopMediaSource[]>;
         on(
           channel: string,
           func: (...args: unknown[]) => void

@@ -3,6 +3,9 @@ import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
 contextBridge.exposeInMainWorld("electron", {
   ipcRenderer: {
     record: () => ipcRenderer.send("main-channel", "record"),
+    getMediaSources: (): Promise<DesktopMediaSource[]> =>
+      ipcRenderer.invoke("main-channel", "getMedia"),
+
     on(channel: string, func: (...args: unknown[]) => void) {
       const validChannels = ["ipc-example"];
       if (validChannels.includes(channel)) {
