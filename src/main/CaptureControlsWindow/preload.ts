@@ -1,9 +1,11 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 
-contextBridge.exposeInMainWorld("captureControls", {
-  ipcRenderer: {
-    closeWindow() {
-      ipcRenderer.send("ipc-example", "close");
-    },
+contextBridge.exposeInMainWorld("electron", {
+  captureControls: {
+    close: () => ipcRenderer.send("capture-controls-channel", "close"),
+    ready: () => ipcRenderer.send("capture-controls-channel", "ready"),
+    play: () => ipcRenderer.send("capture-controls-channel", "play"),
+    pause: () => ipcRenderer.send("capture-controls-channel", "pause"),
+    stop: () => ipcRenderer.send("capture-controls-channel", "stop"),
   },
 });

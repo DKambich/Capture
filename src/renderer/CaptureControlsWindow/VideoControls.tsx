@@ -6,11 +6,15 @@ import {
   PlayArrowRounded,
   StopRounded,
 } from "@material-ui/icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function VideoControls() {
   const [paused, setPaused] = useState(false);
-  console.log(window);
+  // Notify main process when window is ready and React is loaded
+  useEffect(() => window.electron.captureControls.ready(), []);
+
+  const ipcCaptureControls = window.electron.captureControls;
+
   return (
     <>
       <Box
@@ -19,20 +23,24 @@ export default function VideoControls() {
         alignItems="center"
         justifyContent="space-around"
       >
-        <DragIndicatorRounded className="title-bar" />
-        <Typography variant="subtitle1" component="h2">
-          00:00:00
-        </Typography>
-
-        <IconButton onClick={() => setPaused(!paused)}>
+        <DragIndicatorRounded className="drag-handle" />
+        <Box mt={0.4}>
+          <Typography variant="subtitle1" className="unselectable">
+            00:00:00
+          </Typography>
+        </Box>
+        <IconButton
+          onClick={() => {
+            (paused ? ipcCaptureControls.play : ipcCaptureControls.pause)();
+            setPaused(!paused);
+          }}
+        >
           {paused ? <PlayArrowRounded /> : <PauseRounded />}
         </IconButton>
-        <IconButton>
+        <IconButton onClick={ipcCaptureControls.stop}>
           <StopRounded />
         </IconButton>
-        <IconButton
-          onClick={() => window.captureControls.ipcRenderer.closeWindow()}
-        >
+        <IconButton onClick={ipcCaptureControls.close}>
           <CloseRounded />
         </IconButton>
       </Box>

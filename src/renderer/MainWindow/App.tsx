@@ -48,7 +48,7 @@ function App() {
       <Button
         variant="contained"
         color="primary"
-        onClick={() => window.electron.ipcRenderer.myPing()}
+        onClick={() => window.electron.ipcRenderer.record()}
       >
         Hello World
       </Button>

@@ -1,13 +1,15 @@
 declare global {
   interface Window {
-    captureControls: {
-      ipcRenderer: {
-        closeWindow(): void;
-      };
-    };
     electron: {
+      captureControls: {
+        ready(): void;
+        play(): void;
+        pause(): void;
+        stop(): void;
+        close(): void;
+      };
       ipcRenderer: {
-        myPing(): void;
+        record(): void;
         on(
           channel: string,
           func: (...args: unknown[]) => void

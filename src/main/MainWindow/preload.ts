@@ -2,9 +2,7 @@ import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
 
 contextBridge.exposeInMainWorld("electron", {
   ipcRenderer: {
-    myPing() {
-      ipcRenderer.send("ipc-example", "ping");
-    },
+    record: () => ipcRenderer.send("main-channel", "record"),
     on(channel: string, func: (...args: unknown[]) => void) {
       const validChannels = ["ipc-example"];
       if (validChannels.includes(channel)) {
