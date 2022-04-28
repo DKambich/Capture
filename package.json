@@ -61,7 +61,10 @@
                 {
                   "html": "./src/renderer/CaptureControlsWindow/index.html",
                   "js": "./src/renderer/CaptureControlsWindow/renderer.ts",
-                  "name": "video_controls"
+                  "name": "video_controls",
+                  "preload": {
+                    "js": "./src/main/CaptureControlsWindow/preload.ts"
+                  }
                 }
               ]
             }
@@ -93,6 +96,9 @@
     "typescript": "~4.5.4"
   },
   "dependencies": {
+    "@fontsource/roboto": "^4.5.5",
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
     "electron-squirrel-startup": "^1.0.0",
     "react": "^17.0.0",
     "react-dom": "^17.0.0"

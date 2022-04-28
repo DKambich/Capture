@@ -1,5 +1,10 @@
 declare global {
   interface Window {
+    captureControls: {
+      ipcRenderer: {
+        closeWindow(): void;
+      };
+    };
     electron: {
       ipcRenderer: {
         myPing(): void;

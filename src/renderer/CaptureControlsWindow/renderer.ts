@@ -2,7 +2,7 @@
 import React from "react";
 import * as ReactDOM from "react-dom";
 import "./index.css";
-
+import "@fontsource/roboto";
 import VideoControls from "./VideoControls";
 ReactDOM.render(
   React.createElement(VideoControls),

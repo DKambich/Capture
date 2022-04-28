@@ -27,7 +27,7 @@
  */
 // TODO: This renderer.ts entrypoint is defined in package.json, for other windows, define a seperate entrypoint with HTML, JS, and a name
 import "./index.css";
-
+import "@fontsource/roboto";
 
 // Add this to the end of the existing file
 import "./App";
