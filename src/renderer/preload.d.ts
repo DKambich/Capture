@@ -2,7 +2,6 @@ declare global {
   interface Window {
     electron: {
       captureControls: {
-        ready(): void;
         play(): void;
         pause(): void;
         stop(): void;

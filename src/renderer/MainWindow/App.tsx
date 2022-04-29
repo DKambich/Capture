@@ -8,36 +8,17 @@ import {
   CardContent,
   CardMedia,
   CssBaseline,
+  Grid,
   IconButton,
-  makeStyles,
+  Stack,
   Toolbar,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
+import { DesktopWindowsRounded, MenuRounded } from "@mui/icons-material";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import MenuIcon from "@material-ui/icons/Menu";
-import { DesktopWindowsRounded } from "@material-ui/icons";
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-  },
-  menuButton: {
-    marginRight: theme.spacing(2),
-  },
-  title: {
-    flexGrow: 1,
-  },
-  cardRoot: {
-    maxWidth: 345,
-  },
-  media: {
-    height: 140,
-  },
-}));
 
 function App() {
-  const classes = useStyles();
   const [data, setData] = React.useState<DesktopMediaSource[]>([]);
 
   React.useEffect(() => {
@@ -45,26 +26,28 @@ function App() {
       setData(data);
     });
   }, []);
-  console.log(data);
   return (
     <>
       <CssBaseline />
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton
-            edge="start"
-            className={classes.menuButton}
-            color="inherit"
-            aria-label="menu"
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" className={classes.title}>
-            News
-          </Typography>
-          <Button color="inherit">Login</Button>
-        </Toolbar>
-      </AppBar>
+      <Box sx={{ flexGrow: 1 }}>
+        <AppBar position="static">
+          <Toolbar>
+            <IconButton
+              size="large"
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              sx={{ mr: 2 }}
+            >
+              <MenuRounded />
+            </IconButton>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              News
+            </Typography>
+            <Button color="inherit">Login</Button>
+          </Toolbar>
+        </AppBar>
+      </Box>
       <Button
         variant="contained"
         color="primary"
@@ -83,14 +66,14 @@ function App() {
       >
         Refresh Displays
       </Button>
-      {data.map((e) => (
-        <>
-          <Card className={classes.cardRoot}>
-            <CardActionArea>
+      <Grid container spacing={2}>
+        {data.map((e) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} xl={2}>
+            <Card sx={{ width: 345 }}>
               <CardMedia
-                className={classes.media}
-                src={e.thumbnailDataURL}
                 component="img"
+                height={(345 * 9) / 16}
+                src={e.thumbnailDataURL}
                 title="Contemplative Reptile"
               />
               <CardContent>
@@ -116,15 +99,15 @@ function App() {
                   </Typography>
                 </Box>
               </CardContent>
-            </CardActionArea>
-            <CardActions>
-              <Button size="small" color="primary">
-                Record
-              </Button>
-            </CardActions>
-          </Card>
-        </>
-      ))}
+              <CardActions>
+                <Button size="small" color="primary">
+                  Record
+                </Button>
+              </CardActions>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
     </>
   );
 }

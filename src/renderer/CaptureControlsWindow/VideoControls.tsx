@@ -1,17 +1,16 @@
-import { Box, IconButton, Typography } from "@material-ui/core";
+import { Box, IconButton, Typography } from "@mui/material";
 import {
   CloseRounded,
   DragIndicatorRounded,
   PauseRounded,
   PlayArrowRounded,
   StopRounded,
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 import React, { useEffect, useState } from "react";
 
 export default function VideoControls() {
   const [paused, setPaused] = useState(false);
   // Notify main process when window is ready and React is loaded
-  useEffect(() => window.electron.captureControls.ready(), []);
 
   const ipcCaptureControls = window.electron.captureControls;
 

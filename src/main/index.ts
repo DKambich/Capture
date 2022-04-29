@@ -39,10 +39,11 @@ const createMainWindow = (): void => {
 const createCaptureControlsWindow = (): void => {
   captureControlsWindow = new BrowserWindow({
     title: "Capture Controls",
-    height: 64,
+    height: 56,
     width: 300,
     frame: false,
     resizable: false,
+    show: false,
     webPreferences: {
       nodeIntegration: false, // is default value after Electron v5
       contextIsolation: true, // protect against prototype pollution
@@ -53,7 +54,9 @@ const createCaptureControlsWindow = (): void => {
   // and load the index.html of the app.
   captureControlsWindow.loadURL(VIDEO_CONTROLS_WEBPACK_ENTRY);
   captureControlsWindow.setContentProtection(true);
-  captureControlsWindow.hide();
+  captureControlsWindow.once("ready-to-show", () =>
+    captureControlsWindow.show()
+  );
 };
 
 // This method will be called when Electron has finished
@@ -114,9 +117,6 @@ ipcMain.handle("main-channel", async (event, arg) => {
 // Listen for capture control eventshttps://stackoverflow.com/questions/42519933/select-a-region-of-desktop-screen-with-electron
 ipcMain.on("capture-controls-channel", (event, arg) => {
   switch (arg) {
-    case "ready":
-      captureControlsWindow.show();
-      break;
     case "play":
       console.log(event.sender.getTitle(), "Play");
       break;
