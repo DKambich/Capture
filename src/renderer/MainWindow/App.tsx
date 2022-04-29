@@ -2,18 +2,12 @@ import {
   AppBar,
   Box,
   Button,
-  Card,
-  CardActionArea,
-  CardActions,
-  CardContent,
-  CardMedia,
   CssBaseline,
   Grid,
   IconButton,
   ListSubheader,
   MenuItem,
   Select,
-  Stack,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -27,12 +21,11 @@ import {
 } from "@mui/icons-material";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import VideoSourcePreviewCard from "./components/VideoSourcePreviewCard";
 
 function App() {
   const [mediaData, setMediaData] = React.useState<CaptureMediaSource[]>([]);
   const [videoID, setVideoID] = React.useState("");
-  console.log(videoID);
-  const [data, setData] = React.useState([]);
 
   const [stream, setStream] = React.useState(null);
 
@@ -46,19 +39,12 @@ function App() {
   const windowOutputDevices = mediaData.filter((e) => e.type === "window");
   const screenOutputDevices = mediaData.filter((e) => e.type === "screen");
 
+  console.log(screenOutputDevices);
+
   async function refreshMedia() {
     const displayMedia = await window.electron.ipcRenderer.getMediaSources();
     const ioDevices = await navigator.mediaDevices.enumerateDevices();
-
-    setMediaData([
-      ...displayMedia.map(
-        (media): CaptureMediaSource => ({
-          id: media.id,
-          label: media.name,
-          type: media.type,
-          iconDataURL: media.iconDataURL,
-        })
-      ),
+    displayMedia.push(
       ...ioDevices.map(
         (device): CaptureMediaSource => ({
           id: device.deviceId,
@@ -66,8 +52,9 @@ function App() {
           type: device.kind,
           iconDataURL: null,
         })
-      ),
-    ]);
+      )
+    );
+    setMediaData(displayMedia);
   }
 
   async function getStreamfromMediaSource(source: CaptureMediaSource) {
@@ -201,68 +188,21 @@ function App() {
           Refresh Displays
         </Button>
       </Box>
-      <video
-        ref={(video) => {
-          if (stream != null && video != null) {
-            video.srcObject = stream;
-            video.onloadedmetadata = (e) => video.play();
-          }
-        }}
-        width={800}
-        height={600}
-      />
+
       <Grid container spacing={2} p={1}>
         {screenOutputDevices.map((e) => (
           <Grid item xs={12} sm={6} md={4} lg={4} xl={3} key={e.id}>
-            <Card sx={{ width: "100%" }}>
-              <CardMedia
-                component="img"
-                sx={{ width: "100%", height: "auto", aspectRatio: 16 / 9 }}
-                // src={e.thumbnailDataURL}
-                title="Contemplative Reptile"
-              />
-              <CardContent>
-                <Typography
-                  gutterBottom
-                  variant="h5"
-                  component="h2"
-                  noWrap
-                  sx={{
-                    overflow: "hidden",
-                    maxLines: 1,
-                  }}
-                >
-                  {e.label}
-                </Typography>
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  {e.iconDataURL != null ? (
-                    <img src={e.iconDataURL} width={24} height={24} />
-                  ) : (
-                    <DesktopWindowsRounded />
-                  )}
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    component="p"
-                  >
-                    {e.id}
-                  </Typography>
-                </Box>
-              </CardContent>
-              <CardActions>
-                <Button
-                  size="small"
-                  color="primary"
-                  onClick={window.electron.ipcRenderer.record}
-                >
-                  Record
-                </Button>
-              </CardActions>
-            </Card>
+            <VideoSourcePreviewCard videoSource={e} />
+          </Grid>
+        ))}
+        {windowOutputDevices.map((e) => (
+          <Grid item xs={12} sm={6} md={4} lg={4} xl={3} key={e.id}>
+            <VideoSourcePreviewCard videoSource={e} />
+          </Grid>
+        ))}
+        {videoOutputDevices.map((e) => (
+          <Grid item xs={12} sm={6} md={4} lg={4} xl={3} key={e.id}>
+            <VideoSourcePreviewCard videoSource={e} />
           </Grid>
         ))}
       </Grid>

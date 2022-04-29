@@ -104,39 +104,26 @@ ipcMain.handle("main-channel", async (event, arg) => {
   if (arg === "getMedia") {
     const captureScreenSources = await desktopCapturer.getSources({
       types: ["screen"],
-      fetchWindowIcons: true,
-      thumbnailSize: {
-        width: screen.getPrimaryDisplay().size.width,
-        height: screen.getPrimaryDisplay().size.height,
-      },
     });
     const captureWindowSources = await desktopCapturer.getSources({
       types: ["window"],
       fetchWindowIcons: true,
-      thumbnailSize: {
-        width: screen.getPrimaryDisplay().size.width,
-        height: screen.getPrimaryDisplay().size.height,
-      },
     });
     return [
       ...captureWindowSources.map(
-        (source): DesktopMediaSource => ({
+        (source): CaptureMediaSource => ({
           id: source.id,
           type: "window",
-          display_id: source.display_id,
-          name: source.name,
+          label: source.name,
           iconDataURL: source.appIcon?.toDataURL(),
-          thumbnailDataURL: source.thumbnail.toDataURL(),
         })
       ),
       ...captureScreenSources.map(
-        (source): DesktopMediaSource => ({
+        (source): CaptureMediaSource => ({
           id: source.id,
           type: "screen",
-          display_id: source.display_id,
-          name: source.name,
+          label: source.name,
           iconDataURL: source.appIcon?.toDataURL(),
-          thumbnailDataURL: source.thumbnail.toDataURL(),
         })
       ),
     ];
