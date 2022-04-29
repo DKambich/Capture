@@ -9,10 +9,13 @@ import {
 import React, { useEffect, useState } from "react";
 
 export default function VideoControls() {
-  const [paused, setPaused] = useState(false);
-  // Notify main process when window is ready and React is loaded
-
   const ipcCaptureControls = window.electron.captureControls;
+
+  const [paused, setPaused] = useState(true);
+  // Notify main process when window is ready and React is loaded
+  useEffect(() => {
+    ipcCaptureControls.play();
+  }, []);
 
   return (
     <>

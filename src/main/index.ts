@@ -41,11 +41,16 @@ const createCaptureControlsWindow = (): void => {
     title: "Capture Controls",
     height: 56,
     width: 300,
+
+    x: screen.getPrimaryDisplay().size.width / 2 - 300 / 2,
+    y: screen.getPrimaryDisplay().size.height - 150,
+
     frame: false,
     resizable: false,
+    alwaysOnTop: true,
     show: false,
+
     webPreferences: {
-      nodeIntegration: false, // is default value after Electron v5
       contextIsolation: true, // protect against prototype pollution
       preload: VIDEO_CONTROLS_PRELOAD_WEBPACK_ENTRY,
     },
@@ -54,9 +59,13 @@ const createCaptureControlsWindow = (): void => {
   // and load the index.html of the app.
   captureControlsWindow.loadURL(VIDEO_CONTROLS_WEBPACK_ENTRY);
   captureControlsWindow.setContentProtection(true);
+
   captureControlsWindow.once("ready-to-show", () =>
     captureControlsWindow.show()
   );
+  captureControlsWindow.once("closed", () => {
+    captureControlsWindow = null;
+  });
 };
 
 // This method will be called when Electron has finished
@@ -93,24 +102,44 @@ ipcMain.on("main-channel", (event, arg) => {
 
 ipcMain.handle("main-channel", async (event, arg) => {
   if (arg === "getMedia") {
-    const captureSources = await desktopCapturer.getSources({
-      types: ["window", "screen"],
+    const captureScreenSources = await desktopCapturer.getSources({
+      types: ["screen"],
       fetchWindowIcons: true,
       thumbnailSize: {
         width: screen.getPrimaryDisplay().size.width,
         height: screen.getPrimaryDisplay().size.height,
       },
     });
-    const mapped = captureSources.map(
-      (source): DesktopMediaSource => ({
-        id: source.id,
-        display_id: source.display_id,
-        name: source.name,
-        iconDataURL: source.appIcon?.toDataURL(),
-        thumbnailDataURL: source.thumbnail.toDataURL(),
-      })
-    );
-    return mapped;
+    const captureWindowSources = await desktopCapturer.getSources({
+      types: ["window"],
+      fetchWindowIcons: true,
+      thumbnailSize: {
+        width: screen.getPrimaryDisplay().size.width,
+        height: screen.getPrimaryDisplay().size.height,
+      },
+    });
+    return [
+      ...captureWindowSources.map(
+        (source): DesktopMediaSource => ({
+          id: source.id,
+          type: "window",
+          display_id: source.display_id,
+          name: source.name,
+          iconDataURL: source.appIcon?.toDataURL(),
+          thumbnailDataURL: source.thumbnail.toDataURL(),
+        })
+      ),
+      ...captureScreenSources.map(
+        (source): DesktopMediaSource => ({
+          id: source.id,
+          type: "screen",
+          display_id: source.display_id,
+          name: source.name,
+          iconDataURL: source.appIcon?.toDataURL(),
+          thumbnailDataURL: source.thumbnail.toDataURL(),
+        })
+      ),
+    ];
   }
 });
 
@@ -128,7 +157,6 @@ ipcMain.on("capture-controls-channel", (event, arg) => {
       break;
     case "close":
       captureControlsWindow.close();
-      captureControlsWindow = null;
       break;
   }
 });
