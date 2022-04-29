@@ -29,23 +29,72 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 function App() {
-  const [data, setData] = React.useState<DesktopMediaSource[]>([]);
-  const [mediaSources, setMediaSources] = React.useState<MediaDeviceInfo[]>([]);
-  React.useEffect(refreshMedia, []);
+  const [mediaData, setMediaData] = React.useState<CaptureMediaSource[]>([]);
+  const [videoID, setVideoID] = React.useState("");
+  console.log(videoID);
+  const [data, setData] = React.useState([]);
 
-  const audioInputDevices = mediaSources.filter((e) => e.kind === "audioinput");
-  const audioOutputDevices = mediaSources.filter(
-    (e) => e.kind === "audiooutput"
-  );
-  const videoOutputDevices = mediaSources.filter(
-    (e) => e.kind === "videoinput"
-  );
-  const windowOutputDevices = data.filter((e) => e.type === "window");
-  const screenOutputDevices = data.filter((e) => e.type === "screen");
+  const [stream, setStream] = React.useState(null);
 
-  function refreshMedia() {
-    window.electron.ipcRenderer.getMediaSources().then(setData);
-    navigator.mediaDevices.enumerateDevices().then(setMediaSources);
+  React.useEffect(() => {
+    refreshMedia();
+  }, []);
+
+  const audioInputDevices = mediaData.filter((e) => e.type === "audioinput");
+  const audioOutputDevices = mediaData.filter((e) => e.type === "audiooutput");
+  const videoOutputDevices = mediaData.filter((e) => e.type === "videoinput");
+  const windowOutputDevices = mediaData.filter((e) => e.type === "window");
+  const screenOutputDevices = mediaData.filter((e) => e.type === "screen");
+
+  async function refreshMedia() {
+    const displayMedia = await window.electron.ipcRenderer.getMediaSources();
+    const ioDevices = await navigator.mediaDevices.enumerateDevices();
+
+    setMediaData([
+      ...displayMedia.map(
+        (media): CaptureMediaSource => ({
+          id: media.id,
+          label: media.name,
+          type: media.type,
+          iconDataURL: media.iconDataURL,
+        })
+      ),
+      ...ioDevices.map(
+        (device): CaptureMediaSource => ({
+          id: device.deviceId,
+          label: device.label,
+          type: device.kind,
+          iconDataURL: null,
+        })
+      ),
+    ]);
+  }
+
+  async function getStreamfromMediaSource(source: CaptureMediaSource) {
+    // This is jank but TS won't let us pass in proper constraints otherwise
+    const mediaDevices = navigator.mediaDevices as any;
+    let constraints;
+    switch (source.type) {
+      case "screen":
+      case "window":
+        constraints = {
+          video: {
+            mandatory: {
+              chromeMediaSource: "desktop",
+              chromeMediaSourceId: source.id,
+            },
+          },
+        };
+        break;
+      case "videoinput":
+        constraints = {
+          video: {
+            sourceID: source.id,
+          },
+        };
+        break;
+    }
+    return await mediaDevices.getUserMedia(constraints);
   }
 
   return (
@@ -72,7 +121,16 @@ function App() {
       </Box>
       <Grid container p={1} spacing={1}>
         <Grid item xs={12} sm={6}>
-          <Select sx={{ width: "100%", maxWidth: "100%" }}>
+          <Select
+            sx={{ width: "100%", maxWidth: "100%" }}
+            value={videoID}
+            onChange={(e) => {
+              setVideoID(e.target.value);
+              getStreamfromMediaSource(
+                mediaData.find((media) => media.id === e.target.value)
+              ).then(setStream);
+            }}
+          >
             <ListSubheader>
               <Box display="flex" alignItems="center">
                 <DesktopWindowsRounded fontSize="small" />
@@ -81,7 +139,7 @@ function App() {
               </Box>
             </ListSubheader>
             {screenOutputDevices.map((e) => (
-              <MenuItem value={e.id}>{e.name}</MenuItem>
+              <MenuItem value={e.id}>{e.label}</MenuItem>
             ))}
             <ListSubheader>
               <Box display="flex" alignItems="center">
@@ -94,7 +152,7 @@ function App() {
               <MenuItem value={e.id}>
                 <img src={e.iconDataURL} width={16} height={16} />
                 <Box mx={0.5} />
-                {e.name}
+                {e.label}
               </MenuItem>
             ))}
             <ListSubheader>
@@ -108,7 +166,7 @@ function App() {
               <MenuItem disabled={true}>No Video Ouput Devices Found</MenuItem>
             ) : (
               videoOutputDevices.map((e) => (
-                <MenuItem value={e.deviceId}>{e.label}</MenuItem>
+                <MenuItem value={e.id}>{e.label}</MenuItem>
               ))
             )}
           </Select>
@@ -123,7 +181,7 @@ function App() {
               </Box>
             </ListSubheader>
             {audioInputDevices.map((e) => (
-              <MenuItem value={e.deviceId}>{e.label}</MenuItem>
+              <MenuItem value={e.id}>{e.label}</MenuItem>
             ))}
             <ListSubheader>
               <Box display="flex" alignItems="center">
@@ -133,7 +191,7 @@ function App() {
               </Box>
             </ListSubheader>
             {audioOutputDevices.map((e) => (
-              <MenuItem value={e.deviceId}>{e.label}</MenuItem>
+              <MenuItem value={e.id}>{e.label}</MenuItem>
             ))}
           </Select>
         </Grid>
@@ -143,14 +201,24 @@ function App() {
           Refresh Displays
         </Button>
       </Box>
+      <video
+        ref={(video) => {
+          if (stream != null && video != null) {
+            video.srcObject = stream;
+            video.onloadedmetadata = (e) => video.play();
+          }
+        }}
+        width={800}
+        height={600}
+      />
       <Grid container spacing={2} p={1}>
-        {data.map((e) => (
+        {screenOutputDevices.map((e) => (
           <Grid item xs={12} sm={6} md={4} lg={4} xl={3} key={e.id}>
             <Card sx={{ width: "100%" }}>
               <CardMedia
                 component="img"
                 sx={{ width: "100%", height: "auto", aspectRatio: 16 / 9 }}
-                src={e.thumbnailDataURL}
+                // src={e.thumbnailDataURL}
                 title="Contemplative Reptile"
               />
               <CardContent>
@@ -164,7 +232,7 @@ function App() {
                     maxLines: 1,
                   }}
                 >
-                  {e.name}
+                  {e.label}
                 </Typography>
                 <Box
                   display="flex"
